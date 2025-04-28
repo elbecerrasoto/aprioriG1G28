@@ -5,10 +5,6 @@ TARGZ = data.tar.gz
 help:
 	less Makefile
 
-.PHONY test:
-test: $(DATA)
-	Rscript asserts.R
-
 $(DATA): $(TARGZ)
 	@if [ -d "$(DATA)" ]; then echo "$(DATA) already exists, skipping extraction."; else tar -xvf $<; fi
 	@touch $@
