@@ -1,7 +1,7 @@
 library(tidyverse)
 library(arules)
 
-HITS <- "ARCH.tsv"
+HITS <- "data/regions.tsv"
 hits <- read_tsv(HITS)
 
 
@@ -32,4 +32,13 @@ transactions <- transactions |>
   select(-neID)
 
 transactions <- as(transactions, "transactions")
-rules <- apriori(transactions, parameter = list(support = 0.12, confidence = 0.72))
+rules <- apriori(transactions, parameter = list(support = 0.01, confidence = 0.64))
+
+rules_df <- as(rules, "data.frame")
+rules_tb <- as_tibble(rules_df)
+
+rules_tb |>
+  arrange(desc(lift))idence), desc(lift)) |>
+  view()
+
+
