@@ -1,24 +1,17 @@
 DATA = data
-TARGZ = data.tar.gz
+TARGZ = .data.tar.gz
 
 .PHONY help:
 help:
 	less Makefile
 
 $(DATA): $(TARGZ)
-	@if [ -d "$(DATA)" ]; then echo "$(DATA) already exists, skipping extraction."; else tar -xvf $<; fi
-	@touch $@
-
-# PHONY Avoids circular dependency
-.PHONY targz:
-targz:
-	tar -czvf $(TARGZ) $(DATA)
+	@if [ -d "$(DATA)" ]; then echo "$(DATA) already exists, skipping extraction."; else tar -xzvf $< ; fi
+	@touch $@ # Update data/ creation, as tar -xz keep the tape date.
 
 .PHONY style:
 style:
 	Rscript -e 'styler::style_dir(".", recursive = FALSE)'
 
-# .PHONY clean:
-# dangerous
-# as I sometimes modify the input tables
-#	rm -rf data
+.PHONY clean:
+	rm -rf results data
