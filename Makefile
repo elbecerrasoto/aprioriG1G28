@@ -13,5 +13,10 @@ $(DATA): $(TARGZ)
 style:
 	Rscript -e 'styler::style_dir(".", recursive = FALSE)'
 
+
+.PHONY blob-size:
+blob-size:
+	@git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectsize) %(rest)' | perl -ne 'print if !/^commit|^tree/' | sort -nrk2 | perl -ane '$$KB = int($$F[1]/1000); print "$$F[0] $${KB}KB $$F[2]\n"'
+
 .PHONY clean:
 	rm -rf results data
