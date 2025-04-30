@@ -10,13 +10,13 @@ suppressMessages({
 
 HITS <- "data/regions.tsv"
 
-CONFIDENCE <- 0.72 # RHS frequency, given LHS
-SUPPORT <- 0.24 # LHS frequency
+CONFIDENCE <- 0.42 # RHS frequency, given LHS
+SUPPORT <- 0.04 # LHS frequency
 
 RESULTS <- "results"
 OUT_TSV <- glue("{RESULTS}/rawrules.tsv") # RHS frequency, given LHS
 
-FILTER_CURATED <- c(7, 25)
+FILTER_CURATED <- c(1, 28)
 
 # Helpers ----
 
