@@ -9,6 +9,9 @@ suppressMessages({
 ENTRIES <- "data/entries.tsv"
 RAW <- "results/rawrules.tsv"
 
+# PTTG domain
+EXCLUDE <- c("IPR027797")
+
 # Helpers ----
 
 get_sides <- function(rules) {
@@ -93,4 +96,24 @@ long_rules <- bind_rows(lhs_tb, rhs_tb) |>
 long_rules <- left_join(long_rules, wide_rules, join_by(rID)) |>
   select(-lhs, -rhs)
 
+long_rules <- left_join(long_rules, entries, join_by(domain == ENTRY_AC))
+
+long_rules <- long_rules |>
+  rename(
+    entry = ENTRY_NAME,
+    type = ENTRY_TYPE
+  ) |>
+  relocate(entry, type, .after = side)
+
+exclude_tb <- long_rules |>
+  group_by(rID) |>
+  summarize(exclude = any(EXCLUDE %in% domain))
+
+long_rules <- long_rules |>
+  left_join(exclude_tb, join_by(rID)) |>
+  relocate(exclude, .after = rID)
+
 # Output ----
+
+long_rules |>
+  write_tsv("results/long_rules.tsv")
