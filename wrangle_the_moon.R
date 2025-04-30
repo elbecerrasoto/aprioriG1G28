@@ -6,6 +6,7 @@ suppressMessages({
 
 # Globals ----
 
+ENTRIES <- "data/entries.tsv"
 RAW <- "results/rawrules.tsv"
 
 # Helpers ----
@@ -41,15 +42,23 @@ arch_length <- function(arch, pattern = ";") {
   map_int(arch, f)
 }
 
+break_arch <- function(arch, pattern = ";") {
+  f <- function(iarch) {
+    str_split_1(iarch, pattern)
+  }
+  map(arch, f) |> unlist()
+}
+
 # Load Data ----
 
 raw <- read_tsv(RAW, col_types = cols(count = col_integer()))
+entries <- read_tsv(ENTRIES, show_col_types = FALSE)
 
 # Main ----
 
 raw <- raw |>
   arrange(desc(count), desc(lift)) |>
-  mutate(rID = str_c("R", 1:nrow(raw))) |>
+  mutate(rID = 1:nrow(raw)) |>
   relocate(rID)
 
 
@@ -64,6 +73,24 @@ wide_rules <- raw |>
   relocate(rID, lhs, rhs, rulen, lhslen, rhslen) |>
   select(-rules)
 
+lhs_tb <- wide_rules |>
+  group_by(rID) |>
+  reframe(
+    domain = break_arch(lhs),
+    side = "lhs"
+  )
 
+rhs_tb <- wide_rules |>
+  group_by(rID) |>
+  reframe(
+    domain = break_arch(rhs),
+    side = "rhs"
+  )
+
+long_rules <- bind_rows(lhs_tb, rhs_tb) |>
+  arrange(rID)
+
+long_rules <- left_join(long_rules, wide_rules, join_by(rID)) |>
+  select(-lhs, -rhs)
 
 # Output ----
