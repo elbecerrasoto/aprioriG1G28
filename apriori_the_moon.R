@@ -2,6 +2,7 @@
 
 suppressMessages({
   library(tidyverse)
+  library(glue)
   library(arules)
 })
 
@@ -9,10 +10,13 @@ suppressMessages({
 
 HITS <- "data/regions.tsv"
 
-CONFIDENCE <- 0.64 # RHS frequency, given LHS
-SUPPORT <- 0.01 # LHS frequency
+CONFIDENCE <- 0.72 # RHS frequency, given LHS
+SUPPORT <- 0.24 # LHS frequency
 
-OUT_TSV <- "results/rawrules.tsv" # RHS frequency, given LHS
+RESULTS <- "results"
+OUT_TSV <- glue("{RESULTS}/rawrules.tsv") # RHS frequency, given LHS
+
+FILTER_CURATED <- c(7, 25)
 
 # Helpers ----
 
@@ -23,11 +27,12 @@ split_domains <- function(x, pattern = "\\|") {
 
 # Load Data ----
 
-hits <- read_tsv(HITS)
+hits <- read_tsv(HITS, show_col_types = FALSE)
 
 # Apriori ----
 
 transactions <- hits |>
+  filter(curated %in% FILTER_CURATED) |>
   select(neID, ARCH)
 
 transactions <- transactions |>
@@ -54,5 +59,10 @@ rules_tb <- as_tibble(rules_df)
 
 # Output ----
 
+if (!file.exists(RESULTS)) {
+  dir.create(RESULTS)
+}
+
 rules_tb |>
+  arrange(desc(count), desc(lift)) |>
   write_tsv(OUT_TSV)
